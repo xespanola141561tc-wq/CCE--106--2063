@@ -1,89 +1,350 @@
-import { Image, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Alert,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+type Task = {
+  id: string;
+  title: string;
+  dueDate: string;
+  completed: boolean;
+};
 
-export default function HomeScreen() {
+export default function App() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [title, setTitle] = useState('');
+  const [dueDate, setDueDate] = useState('');
+
+  const addTask = () => {
+    if (title.trim() === '' || dueDate.trim() === '') {
+      Alert.alert('Error', 'Please enter the task title and due date.');
+      return;
+    }
+
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      dueDate: dueDate.trim(),
+      completed: false,
+    };
+
+    setTasks([...tasks, newTask]);
+    setTitle('');
+    setDueDate('');
+
+    Alert.alert('Success', 'Task added successfully!');
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id
+          ? { ...task, completed: !task.completed }
+          : task
+      )
+    );
+
+    Alert.alert('Success', 'Task status updated!');
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+
+    Alert.alert('Deleted', 'Task deleted successfully!');
+  };
+
+  const pending = tasks.filter(
+    (task) => !task.completed
+  ).length;
+
+  const completed = tasks.filter(
+    (task) => task.completed
+  ).length;
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#0F172A', dark: '#0F172A' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      
-      <ThemedView style={styles.cardContainer}>
-        <ThemedText style={styles.titleText}>
-          App Title: EventPulse
-        </ThemedText>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <View style={styles.task}>
+            <TouchableOpacity
+              style={[
+                styles.check,
+                item.completed && styles.checked,
+              ]}
+              onPress={() => toggleTask(item.id)}
+            >
+              <Text style={styles.checkText}>
+                {item.completed ? '✓' : ''}
+              </Text>
+            </TouchableOpacity>
 
-        <ThemedView style={styles.row}>
-          <ThemedText style={styles.labelText}>Student Name: </ThemedText>
-          <ThemedText style={styles.bodyText}>Xerted Joy Espanola.</ThemedText>
-        </ThemedView>
+            <View style={styles.taskInfo}>
+              <Text
+                style={[
+                  styles.taskTitle,
+                  item.completed && styles.done,
+                ]}
+              >
+                {item.title}
+              </Text>
 
-        <ThemedView style={styles.row}>
-          <ThemedText style={styles.labelText}>Course/Section: </ThemedText>
-          <ThemedText style={styles.bodyText}>BSIT 4TH YEAR</ThemedText>
-        </ThemedView>
+              <Text style={styles.date}>
+                Due: {item.dueDate}
+              </Text>
+            </View>
 
-        <ThemedView style={styles.section}>
-          <ThemedText style={styles.labelText}>Talento:</ThemedText>
-          <ThemedText style={styles.bodyText}>
-          Talento is a social talent-discovery app where users can showcase their skills, discover other people's talents, learn new skills, and offer services.
+            <TouchableOpacity
+              onPress={() => deleteTask(item.id)}
+            >
+              <Text style={styles.delete}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        ListHeaderComponent={
+          <View>
+            <Text style={styles.title}>My Tasks</Text>
 
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+            <View style={styles.student}>
+              <Text style={styles.name}>
+                Xerted Joy Espanola
+              </Text>
 
-    </ParallaxScrollView>
+              <Text style={styles.program}>
+                BS Information Technology
+              </Text>
+            </View>
+
+            <View style={styles.stats}>
+              <View style={styles.stat}>
+                <Text style={styles.number}>
+                  {pending}
+                </Text>
+
+                <Text style={styles.label}>
+                  Pending
+                </Text>
+              </View>
+
+              <View style={styles.stat}>
+                <Text style={styles.number}>
+                  {completed}
+                </Text>
+
+                <Text style={styles.label}>
+                  Completed
+                </Text>
+              </View>
+
+              <View style={styles.stat}>
+                <Text style={styles.number}>
+                  {tasks.length}
+                </Text>
+
+                <Text style={styles.label}>
+                  Total
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.heading}>
+              Add New Task
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Task title"
+              value={title}
+              onChangeText={setTitle}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Due date"
+              value={dueDate}
+              onChangeText={setDueDate}
+            />
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={addTask}
+            >
+              <Text style={styles.buttonText}>
+                + Add Task
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.heading}>
+              My Task List
+            </Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <Text style={styles.empty}>
+            No tasks yet.
+          </Text>
+        }
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: '#0F172A',
-    padding: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+  container: {
+    flex: 1,
+    backgroundColor: 'lightgray',
   },
-  titleText: {
-    fontSize: 22,
+
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+
+  title: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    marginBottom: 20,
   },
-  labelText: {
+
+  student: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  program: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 5,
+  },
+
+  stats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+
+  stat: {
+    backgroundColor: 'white',
+    width: '31%',
+    padding: 15,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+
+  number: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+
+  label: {
+    color: 'gray',
+    marginTop: 5,
+  },
+
+  heading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  input: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  button: {
+    backgroundColor: 'blue',
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
   },
-  bodyText: {
-    fontSize: 15,
-    color: '#CBD5E1',
-  },
-  row: {
+
+  task: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
-    backgroundColor: 'transparent',
   },
-  section: {
-    gap: 4,
-    marginBottom: 8,
-    backgroundColor: 'transparent',
+
+  check: {
+    width: 26,
+    height: 26,
+    borderWidth: 2,
+    borderColor: 'blue',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  checked: {
+    backgroundColor: 'blue',
+  },
+
+  checkText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+
+  taskInfo: {
+    flex: 1,
+  },
+
+  taskTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
+  done: {
+    textDecorationLine: 'line-through',
+    color: 'gray',
+  },
+
+  date: {
+    fontSize: 12,
+    color: 'gray',
+    marginTop: 5,
+  },
+
+  delete: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
+
+  empty: {
+    textAlign: 'center',
+    color: 'gray',
+    marginTop: 20,
   },
 });
