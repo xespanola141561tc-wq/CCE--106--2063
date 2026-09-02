@@ -1,350 +1,217 @@
 import React, { useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-type Task = {
-  id: string;
-  title: string;
-  dueDate: string;
-  completed: boolean;
-};
+export default function SimpleCalculator() {
+  const [displayValue, setDisplayValue] = useState('0');
+  const [firstValue, setFirstValue] = useState<number | null>(null);
+  const [operator, setOperator] = useState<string | null>(null);
+  const [waitingForNextValue, setWaitingForNextValue] = useState(false);
 
-export default function App() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [title, setTitle] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const handleNumber = (num: string) => {
+    if (waitingForNextValue) {
+      setDisplayValue(num);
+      setWaitingForNextValue(false);
+    } else {
+      setDisplayValue(displayValue === '0' ? num : displayValue + num);
+    }
+  };
 
-  const addTask = () => {
-    if (title.trim() === '' || dueDate.trim() === '') {
-      Alert.alert('Error', 'Please enter the task title and due date.');
-      return;
+  const handleOperator = (nextOperator: string) => {
+    const inputValue = parseFloat(displayValue);
+
+    if (firstValue === null) {
+      setFirstValue(inputValue);
+    } else if (operator) {
+      const result = calculate(firstValue, inputValue, operator);
+      setDisplayValue(String(result));
+      setFirstValue(result);
     }
 
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: title.trim(),
-      dueDate: dueDate.trim(),
-      completed: false,
-    };
-
-    setTasks([...tasks, newTask]);
-    setTitle('');
-    setDueDate('');
-
-    Alert.alert('Success', 'Task added successfully!');
+    setWaitingForNextValue(true);
+    setOperator(nextOperator);
   };
 
-  const toggleTask = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id
-          ? { ...task, completed: !task.completed }
-          : task
-      )
-    );
-
-    Alert.alert('Success', 'Task status updated!');
+  const calculate = (first: number, second: number, op: string) => {
+    switch (op) {
+      case '+': return first + second;
+      case '-': return first - second;
+      case '×': return first * second;
+      case '÷': return second === 0 ? 0 : first / second;
+      default: return second;
+    }
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const handleEqual = () => {
+    const inputValue = parseFloat(displayValue);
 
-    Alert.alert('Deleted', 'Task deleted successfully!');
+    if (firstValue !== null && operator) {
+      const result = calculate(firstValue, inputValue, operator);
+      setDisplayValue(String(result));
+      setFirstValue(null);
+      setOperator(null);
+      setWaitingForNextValue(true);
+    }
   };
 
-  const pending = tasks.filter(
-    (task) => !task.completed
-  ).length;
-
-  const completed = tasks.filter(
-    (task) => task.completed
-  ).length;
+  const handleClear = () => {
+    setDisplayValue('0');
+    setFirstValue(null);
+    setOperator(null);
+    setWaitingForNextValue(false);
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <View style={styles.task}>
-            <TouchableOpacity
-              style={[
-                styles.check,
-                item.completed && styles.checked,
-              ]}
-              onPress={() => toggleTask(item.id)}
-            >
-              <Text style={styles.checkText}>
-                {item.completed ? '✓' : ''}
-              </Text>
-            </TouchableOpacity>
+    <View style={styles.container}>
+      {/* Screen Display */}
+      <View style={styles.displayContainer}>
+        <Text style={styles.subDisplayText}>
+          {firstValue !== null ? `${firstValue} ${operator || ''}` : ''}
+        </Text>
+        <Text style={styles.displayText} numberOfLines={1} adjustsFontSizeToFit>
+          {displayValue}
+        </Text>
+      </View>
 
-            <View style={styles.taskInfo}>
-              <Text
-                style={[
-                  styles.taskTitle,
-                  item.completed && styles.done,
-                ]}
-              >
-                {item.title}
-              </Text>
+      {/* Keypad Grid */}
+      <View style={styles.keypad}>
+        <View style={styles.row}>
+          <TouchableOpacity style={[styles.button, styles.clearBtn]} onPress={handleClear}>
+            <Text style={[styles.buttonText, styles.clearBtnText]}>AC</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('÷')}>
+            <Text style={styles.operatorText}>÷</Text>
+          </TouchableOpacity>
+        </View>
 
-              <Text style={styles.date}>
-                Due: {item.dueDate}
-              </Text>
-            </View>
+        <View style={styles.row}>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('7')}>
+            <Text style={styles.buttonText}>7</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('8')}>
+            <Text style={styles.buttonText}>8</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('9')}>
+            <Text style={styles.buttonText}>9</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('×')}>
+            <Text style={styles.operatorText}>×</Text>
+          </TouchableOpacity>
+        </View>
 
-            <TouchableOpacity
-              onPress={() => deleteTask(item.id)}
-            >
-              <Text style={styles.delete}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        ListHeaderComponent={
-          <View>
-            <Text style={styles.title}>My Tasks</Text>
+        <View style={styles.row}>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('4')}>
+            <Text style={styles.buttonText}>4</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('5')}>
+            <Text style={styles.buttonText}>5</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('6')}>
+            <Text style={styles.buttonText}>6</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('-')}>
+            <Text style={styles.operatorText}>−</Text>
+          </TouchableOpacity>
+        </View>
 
-            <View style={styles.student}>
-              <Text style={styles.name}>
-                Xerted Joy Espanola
-              </Text>
+        <View style={styles.row}>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('1')}>
+            <Text style={styles.buttonText}>1</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('2')}>
+            <Text style={styles.buttonText}>2</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('3')}>
+            <Text style={styles.buttonText}>3</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('+')}>
+            <Text style={styles.operatorText}>+</Text>
+          </TouchableOpacity>
+        </View>
 
-              <Text style={styles.program}>
-                BS Information Technology
-              </Text>
-            </View>
-
-            <View style={styles.stats}>
-              <View style={styles.stat}>
-                <Text style={styles.number}>
-                  {pending}
-                </Text>
-
-                <Text style={styles.label}>
-                  Pending
-                </Text>
-              </View>
-
-              <View style={styles.stat}>
-                <Text style={styles.number}>
-                  {completed}
-                </Text>
-
-                <Text style={styles.label}>
-                  Completed
-                </Text>
-              </View>
-
-              <View style={styles.stat}>
-                <Text style={styles.number}>
-                  {tasks.length}
-                </Text>
-
-                <Text style={styles.label}>
-                  Total
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.heading}>
-              Add New Task
-            </Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Task title"
-              value={title}
-              onChangeText={setTitle}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Due date"
-              value={dueDate}
-              onChangeText={setDueDate}
-            />
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={addTask}
-            >
-              <Text style={styles.buttonText}>
-                + Add Task
-              </Text>
-            </TouchableOpacity>
-
-            <Text style={styles.heading}>
-              My Task List
-            </Text>
-          </View>
-        }
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No tasks yet.
-          </Text>
-        }
-      />
-    </SafeAreaView>
+        <View style={styles.row}>
+          <TouchableOpacity style={[styles.button, styles.zeroBtn]} onPress={() => handleNumber('0')}>
+            <Text style={styles.buttonText}>0</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => handleNumber('.')}>
+            <Text style={styles.buttonText}>.</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.equalBtn]} onPress={handleEqual}>
+            <Text style={styles.equalText}>=</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'lightgray',
-  },
-
-  content: {
+    backgroundColor: '#0f172a',
+    justifyContent: 'flex-end',
     padding: 20,
-    paddingBottom: 40,
   },
-
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  displayContainer: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+    padding: 20,
+    marginBottom: 10,
   },
-
-  student: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
+  subDisplayText: {
+    fontSize: 24,
+    color: '#64748b',
+    marginBottom: 5,
   },
-
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  displayText: {
+    fontSize: 56,
+    color: '#f8fafc',
+    fontWeight: '300',
   },
-
-  program: {
-    fontSize: 14,
-    color: 'gray',
-    marginTop: 5,
+  keypad: {
+    gap: 12,
   },
-
-  stats: {
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    gap: 12,
   },
-
-  stat: {
-    backgroundColor: 'white',
-    width: '31%',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-
-  number: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-
-  label: {
-    color: 'gray',
-    marginTop: 5,
-  },
-
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-
   button: {
-    backgroundColor: 'blue',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-
-  task: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  check: {
-    width: 26,
-    height: 26,
-    borderWidth: 2,
-    borderColor: 'blue',
-    borderRadius: 15,
+    flex: 1,
+    height: 70,
+    backgroundColor: '#1e293b',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    borderRadius: 16,
   },
-
-  checked: {
-    backgroundColor: 'blue',
+  zeroBtn: {
+    flex: 2.1,
   },
-
-  checkText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+  operatorBtn: {
+    backgroundColor: '#334155',
   },
-
-  taskInfo: {
-    flex: 1,
+  equalBtn: {
+    backgroundColor: '#06b6d4',
   },
-
-  taskTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
+  clearBtn: {
+    flex: 3.2,
+    backgroundColor: '#f43fca',
   },
-
-  done: {
-    textDecorationLine: 'line-through',
-    color: 'gray',
+  buttonText: {
+    fontSize: 26,
+    color: '#f8fafc',
+    fontWeight: '500',
   },
-
-  date: {
-    fontSize: 12,
-    color: 'gray',
-    marginTop: 5,
+  operatorText: {
+    fontSize: 28,
+    color: '#38bdf8',
+    fontWeight: '600',
   },
-
-  delete: {
-    color: 'red',
+  clearBtnText: {
     fontWeight: 'bold',
   },
-
-  empty: {
-    textAlign: 'center',
-    color: 'gray',
-    marginTop: 20,
+  equalText: {
+    fontSize: 32,
+    color: '#ffffff',
+    fontWeight: 'bold',
   },
 });
