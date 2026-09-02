@@ -1,217 +1,469 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-export default function SimpleCalculator() {
-  const [displayValue, setDisplayValue] = useState('0');
-  const [firstValue, setFirstValue] = useState<number | null>(null);
-  const [operator, setOperator] = useState<string | null>(null);
-  const [waitingForNextValue, setWaitingForNextValue] = useState(false);
+interface Task {
+  id: string;
+  title: string;
+  dueDate: string;
+  completed: boolean;
+}
 
-  const handleNumber = (num: string) => {
-    if (waitingForNextValue) {
-      setDisplayValue(num);
-      setWaitingForNextValue(false);
-    } else {
-      setDisplayValue(displayValue === '0' ? num : displayValue + num);
+export default function StudentTaskManagerScreen() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [title, setTitle] = useState('');
+  const [dueDate, setDueDate] = useState('');
+
+  const handleAddTask = () => {
+    if (!title.trim() || !dueDate.trim()) {
+      Alert.alert('Missing Field', 'Please fill out both the task title and due date.');
+      return;
     }
+
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      dueDate: dueDate.trim(),
+      completed: false,
+    };
+
+    setTasks([newTask, ...tasks]);
+    setTitle('');
+    setDueDate('');
   };
 
-  const handleOperator = (nextOperator: string) => {
-    const inputValue = parseFloat(displayValue);
-
-    if (firstValue === null) {
-      setFirstValue(inputValue);
-    } else if (operator) {
-      const result = calculate(firstValue, inputValue, operator);
-      setDisplayValue(String(result));
-      setFirstValue(result);
-    }
-
-    setWaitingForNextValue(true);
-    setOperator(nextOperator);
+  const toggleTaskStatus = (id: string) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
   };
 
-  const calculate = (first: number, second: number, op: string) => {
-    switch (op) {
-      case '+': return first + second;
-      case '-': return first - second;
-      case '×': return first * second;
-      case '÷': return second === 0 ? 0 : first / second;
-      default: return second;
-    }
+  const deleteTask = (id: string) => {
+    Alert.alert('Delete Task', 'Are you sure you want to delete this task?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => setTasks(tasks.filter((task) => task.id !== id)),
+      },
+    ]);
   };
 
-  const handleEqual = () => {
-    const inputValue = parseFloat(displayValue);
-
-    if (firstValue !== null && operator) {
-      const result = calculate(firstValue, inputValue, operator);
-      setDisplayValue(String(result));
-      setFirstValue(null);
-      setOperator(null);
-      setWaitingForNextValue(true);
-    }
-  };
-
-  const handleClear = () => {
-    setDisplayValue('0');
-    setFirstValue(null);
-    setOperator(null);
-    setWaitingForNextValue(false);
-  };
+  const pendingCount = tasks.filter((t) => !t.completed).length;
+  const completedCount = tasks.filter((t) => t.completed).length;
 
   return (
-    <View style={styles.container}>
-      {/* Screen Display */}
-      <View style={styles.displayContainer}>
-        <Text style={styles.subDisplayText}>
-          {firstValue !== null ? `${firstValue} ${operator || ''}` : ''}
-        </Text>
-        <Text style={styles.displayText} numberOfLines={1} adjustsFontSizeToFit>
-          {displayValue}
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Modern Top Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greetingText}>WELCOME BACK</Text>
+          <Text style={styles.headerTitle}>Task Dashboard</Text>
+        </View>
+        <TouchableOpacity style={styles.notificationBtn}>
+          <Text style={{ fontSize: 18 }}>🔔</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Keypad Grid */}
-      <View style={styles.keypad}>
-        <View style={styles.row}>
-          <TouchableOpacity style={[styles.button, styles.clearBtn]} onPress={handleClear}>
-            <Text style={[styles.buttonText, styles.clearBtnText]}>AC</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('÷')}>
-            <Text style={styles.operatorText}>÷</Text>
-          </TouchableOpacity>
-        </View>
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        ListHeaderComponent={
+          <>
+            {/* Modern Hero Profile Banner */}
+            <View style={styles.heroCard}>
+              <View style={styles.avatarWrapper}>
+                <Image
+                  source={{ uri: 'https://avatar.iran.liara.run/public/boy?username=Daniel' }}
+                  style={styles.avatar}
+                />
+                <View style={styles.onlineBadge} />
+              </View>
 
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('7')}>
-            <Text style={styles.buttonText}>7</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('8')}>
-            <Text style={styles.buttonText}>8</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('9')}>
-            <Text style={styles.buttonText}>9</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('×')}>
-            <Text style={styles.operatorText}>×</Text>
-          </TouchableOpacity>
-        </View>
+              <View style={styles.profileTextContainer}>
+                <Text style={styles.studentName}>XERTED JOY ESPANOLA</Text>
+                <View style={styles.tagBadge}>
+                  <Text style={styles.tagText}>4th YEAR BSIT</Text>
+                </View>
+                <Text style={styles.studentEmail} numberOfLines={1}>
+                  x.espanola.141561.tc@umindanao.edu.ph
+                </Text>
+              </View>
+            </View>
 
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('4')}>
-            <Text style={styles.buttonText}>4</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('5')}>
-            <Text style={styles.buttonText}>5</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('6')}>
-            <Text style={styles.buttonText}>6</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('-')}>
-            <Text style={styles.operatorText}>−</Text>
-          </TouchableOpacity>
-        </View>
+            {/* Metrics Grid */}
+            <View style={styles.statsGrid}>
+              <View style={[styles.metricCard, styles.pendingCard]}>
+                <View style={styles.metricHeader}>
+                  <Text style={styles.metricIcon}>⏳</Text>
+                  <Text style={styles.metricNumber}>{pendingCount}</Text>
+                </View>
+                <Text style={styles.metricLabel}>Pending Tasks</Text>
+              </View>
 
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('1')}>
-            <Text style={styles.buttonText}>1</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('2')}>
-            <Text style={styles.buttonText}>2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('3')}>
-            <Text style={styles.buttonText}>3</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.operatorBtn]} onPress={() => handleOperator('+')}>
-            <Text style={styles.operatorText}>+</Text>
-          </TouchableOpacity>
-        </View>
+              <View style={[styles.metricCard, styles.completedCard]}>
+                <View style={styles.metricHeader}>
+                  <Text style={styles.metricIcon}>⚡</Text>
+                  <Text style={styles.metricNumber}>{completedCount}</Text>
+                </View>
+                <Text style={styles.metricLabel}>Completed Tasks</Text>
+              </View>
+            </View>
 
-        <View style={styles.row}>
-          <TouchableOpacity style={[styles.button, styles.zeroBtn]} onPress={() => handleNumber('0')}>
-            <Text style={styles.buttonText}>0</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleNumber('.')}>
-            <Text style={styles.buttonText}>.</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.equalBtn]} onPress={handleEqual}>
-            <Text style={styles.equalText}>=</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+            {/* Form Section */}
+            <View style={styles.glassForm}>
+              <Text style={styles.sectionTitle}>Create New Task</Text>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Task title..."
+                  placeholderTextColor="#64748B"
+                  value={title}
+                  onChangeText={setTitle}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Due date (YYYY-MM-DD)"
+                  placeholderTextColor="#64748B"
+                  value={dueDate}
+                  onChangeText={setDueDate}
+                />
+              </View>
+
+              <TouchableOpacity style={styles.actionButton} onPress={handleAddTask}>
+                <Text style={styles.actionButtonText}>Add Task </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.sectionTitle}>Active Schedule</Text>
+          </>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyIcon}>✨</Text>
+            <Text style={styles.emptyTitle}>All Caught Up!</Text>
+            <Text style={styles.emptyText}>No active tasks right now. Create one above.</Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <View style={[styles.taskCard, item.completed && styles.taskCardDone]}>
+            <TouchableOpacity
+              style={styles.taskTouchArea}
+              onPress={() => toggleTaskStatus(item.id)}
+            >
+              <View style={[styles.radioOuter, item.completed && styles.radioActive]}>
+                {item.completed && <View style={styles.radioInner} />}
+              </View>
+
+              <View style={styles.taskContent}>
+                <Text style={[styles.taskTitle, item.completed && styles.textStrikethrough]}>
+                  {item.title}
+                </Text>
+                <View style={styles.dateTag}>
+                  <Text style={styles.dateText}>📅 {item.dueDate}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteTask(item.id)}>
+              <Text style={{ fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
-    justifyContent: 'flex-end',
-    padding: 20,
+    backgroundColor: 'black',
   },
-  displayContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
-    padding: 20,
-    marginBottom: 10,
-  },
-  subDisplayText: {
-    fontSize: 24,
-    color: '#64748b',
-    marginBottom: 5,
-  },
-  displayText: {
-    fontSize: 56,
-    color: '#f8fafc',
-    fontWeight: '300',
-  },
-  keypad: {
-    gap: 12,
-  },
-  row: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
-  button: {
-    flex: 1,
-    height: 70,
-    backgroundColor: '#1e293b',
+  greetingText: {
+    color: '#818CF8',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  headerTitle: {
+    color: '#F8FAFC',
+    fontSize: 26,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  notificationBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#1E293B',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
-  zeroBtn: {
-    flex: 2.1,
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
   },
-  operatorBtn: {
-    backgroundColor: '#334155',
+  heroCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E293B',
+    borderRadius: 24,
+    padding: 18,
+    marginTop: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
-  equalBtn: {
-    backgroundColor: '#06b6d4',
+  avatarWrapper: {
+    position: 'relative',
   },
-  clearBtn: {
-    flex: 3.2,
-    backgroundColor: '#f43fca',
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: '#75739d',
   },
-  buttonText: {
-    fontSize: 26,
-    color: '#f8fafc',
+  onlineBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#10B981',
+    borderWidth: 3,
+    borderColor: '#2265d0',
+  },
+  profileTextContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  studentName: {
+    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  tagBadge: {
+    backgroundColor: '#7c7aba',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  tagText: {
+    color: '#A5B4FC',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  studentEmail: {
+    color: '#94A3B8',
+    fontSize: 11,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  metricCard: {
+    flex: 0.48,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+  },
+  pendingCard: {
+    backgroundColor: '#1E1B4B',
+    borderColor: '#3730A3',
+  },
+  completedCard: {
+    backgroundColor: '#064E3B',
+    borderColor: '#065F46',
+  },
+  metricHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  metricIcon: {
+    fontSize: 20,
+  },
+  metricNumber: {
+    color: '#F8FAFC',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  metricLabel: {
+    color: '#CBD5E1',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 10,
+  },
+  glassForm: {
+    backgroundColor: '#030406',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: '#080a0e',
+  },
+  sectionTitle: {
+    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 14,
+    letterSpacing: 0.5,
+  },
+  inputContainer: {
+    backgroundColor: '#0F172A',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#334155',
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    height: 50,
+    justifyContent: 'center',
+  },
+  input: {
+    color: '#F8FAFC',
+    fontSize: 14,
+  },
+  actionButton: {
+    backgroundColor: '#82ccdc',
+    borderRadius: 14,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  taskCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1E293B',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  taskCardDone: {
+    opacity: 0.6,
+    backgroundColor: '#0F172A',
+  },
+  taskTouchArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#6366F1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  radioActive: {
+    borderColor: '#10B981',
+    backgroundColor: '#293d36',
+  },
+  radioInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+  },
+  taskContent: {
+    flex: 1,
+  },
+  taskTitle: {
+    color: '#F8FAFC',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  textStrikethrough: {
+    textDecorationLine: 'line-through',
+    color: '#64748B',
+  },
+  dateTag: {
+    marginTop: 4,
+  },
+  dateText: {
+    color: '#94A3B8',
+    fontSize: 11,
     fontWeight: '500',
   },
-  operatorText: {
-    fontSize: 28,
-    color: '#38bdf8',
-    fontWeight: '600',
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#334155',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
-  clearBtnText: {
-    fontWeight: 'bold',
+  emptyCard: {
+    backgroundColor: '#6f7989',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#334155',
+    borderStyle: 'dashed',
   },
-  equalText: {
+  emptyIcon: {
     fontSize: 32,
-    color: '#ffffff',
-    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  emptyText: {
+    color: '#64748B',
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: 'center',
   },
 });
