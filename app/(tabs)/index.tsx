@@ -1,113 +1,228 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-interface CounterProps {
-  step?: number;
-}
-
-export default function CounterApp({ step = 1 }: CounterProps) {
-  const [count, setCount] = useState<number>(0);
-
-  const handleIncrease = () => {
-    setCount(prev => prev + step);
-  };
-
-  const handleDecrease = () => {
-    setCount(prev => (prev - step < 0 ? 0 : prev - step));
-  };
-
-  const handleReset = () => {
-    setCount(0);
-  };
+export default function HomeScreen() {
+  const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Guided Mini Project: Counter App</Text>
-      <Text style={styles.subtitle}>
-        A simple app that proves students understand state and events.
-      </Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Simple Top Welcome */}
+        <View style={styles.heroCard}>
+          <View style={styles.avatarWrapper}>
+            <View style={styles.avatar} />
+            <View style={styles.onlineBadge} />
+          </View>
+          <View style={styles.profileTextContainer}>
+            <Text style={styles.greetingText}>GOOD DAY,</Text>
+            <Text style={styles.studentName}>Xerted Joy Espanola</Text>
+            <View style={styles.tagBadge}>
+              <Text style={styles.tagText}>IT STUDENT</Text>
+            </View>
+          </View>
+        </View>
 
-      <View style={styles.displayBox}>
-        <Text style={styles.countText}>{count}</Text>
-      </View>
+        {/* Academic Performance Overview */}
+        <Text style={styles.sectionTitle}>Overview</Text>
+        <View style={styles.statsGrid}>
+          <View style={[styles.metricCard, styles.pendingCard]}>
+            <Text style={styles.metricNumber}>2.85</Text>
+            <Text style={styles.metricLabel}>GPA</Text>
+          </View>
+          <View style={[styles.metricCard, styles.completedCard]}>
+            <Text style={styles.metricNumber}>2</Text>
+            <Text style={styles.metricLabel}>Enrolled</Text>
+          </View>
+          <View style={[styles.metricCard, styles.completedCard]}>
+            <Text style={styles.metricNumber}>95%</Text>
+            <Text style={styles.metricLabel}>Attendance</Text>
+          </View>
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, styles.increaseBtn]} onPress={handleIncrease}>
-          <Text style={styles.buttonText}>Increase</Text>
+        {/* Enrolled Courses */}
+        <Text style={styles.sectionTitle}>Enrolled Courses</Text>
+        
+        <TouchableOpacity 
+          style={styles.taskCard} 
+          onPress={() => router.push({ pathname: '/course/[id]', params: { id: 'CCE106' } })}
+        >
+          <View style={styles.taskContent}>
+            <View style={styles.courseHeaderRow}>
+              <Text style={styles.greetingText}>CCE 106</Text>
+              <Text style={styles.statusText}>Active</Text>
+            </View>
+            <Text style={styles.taskTitle}>Mobile Application Development</Text>
+            <View style={styles.dateTag}>
+              <Text style={styles.dateText}>Tap to view course details</Text>
+            </View>
+          </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.button, styles.decreaseBtn]} onPress={handleDecrease}>
-          <Text style={styles.buttonText}>Decrease</Text>
+        <TouchableOpacity 
+          style={styles.taskCard} 
+          onPress={() => router.push({ pathname: '/course/[id]', params: { id: 'IT17' } })}
+        >
+          <View style={styles.taskContent}>
+            <View style={styles.courseHeaderRow}>
+              <Text style={styles.greetingText}>IT 17</Text>
+              <Text style={styles.statusText}>Active</Text>
+            </View>
+            <Text style={styles.taskTitle}>Social and Professional Issues</Text>
+            <View style={styles.dateTag}>
+              <Text style={styles.dateText}>Tap to view course details</Text>
+            </View>
+          </View>
         </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, styles.resetBtn]} onPress={handleReset}>
-          <Text style={styles.buttonText}>Reset</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1e293b',
+    backgroundColor: '#000000',
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
+  heroCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  displayBox: {
-    width: 220,
-    height: 140,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#061322e6',
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 24,
     borderWidth: 1,
     borderColor: '#334155',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 30,
   },
-  countText: {
-    fontSize: 64,
-    fontWeight: 'bold',
-    color: '#ffffff',
+  avatarWrapper: {
+    position: 'relative',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 10,
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    backgroundColor: '#0a858b',
   },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+  onlineBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: '#0d1017',
+  },
+  profileTextContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  greetingText: {
+    color: '#91b9c1',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  studentName: {
+    color: '#c9def6',
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  tagBadge: {
+    backgroundColor: '#80858a',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
-    minWidth: 85,
+    marginTop: 4,
+  },
+  tagText: {
+    color: '#020204',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  sectionTitle: {
+    color: '#525a62',
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 14,
+    letterSpacing: 0.5,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    gap: 8,
+  },
+  metricCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 1,
     alignItems: 'center',
   },
-  increaseBtn: {
-    backgroundColor: '#86efac',
+  pendingCard: {
+    backgroundColor: '#1E1B4B',
+    borderColor: '#110e3a',
   },
-  decreaseBtn: {
-    backgroundColor: '#fde047',
+  completedCard: {
+    backgroundColor: '#1E293B',
+    borderColor: '#85697f',
   },
-  resetBtn: {
-    backgroundColor: '#93c5fd',
+  metricNumber: {
+    color: '#64a6e8',
+    fontSize: 20,
+    fontWeight: '900',
   },
-  buttonText: {
-    fontSize: 14,
+  metricLabel: {
+    color: '#939495',
+    fontSize: 11,
     fontWeight: '600',
-    color: '#1e293b',
+    marginTop: 4,
+  },
+  taskCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1E293B',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  taskContent: {
+    flex: 1,
+  },
+  courseHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  statusText: {
+    color: '#10B981',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  taskTitle: {
+    color: '#b4bcc5',
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  dateTag: {
+    marginTop: 4,
+  },
+  dateText: {
+    color: '#83aeea',
+    fontSize: 11,
+    fontWeight: '500',
   },
 });
+
