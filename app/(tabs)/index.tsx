@@ -1,228 +1,158 @@
-import { useRouter } from 'expo-router';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { Link, router, type Href } from "expo-router";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { StatCard } from "../../components/StatCard";
+import { events } from "../../data/events";
 
 export default function HomeScreen() {
-  const router = useRouter();
-
+  const { width } = useWindowDimensions();
+  const joined = events.filter((event) => event.joined).length;
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Simple Top Welcome */}
-        <View style={styles.heroCard}>
-          <View style={styles.avatarWrapper}>
-            <View style={styles.avatar} />
-            <View style={styles.onlineBadge} />
-          </View>
-          <View style={styles.profileTextContainer}>
-            <Text style={styles.greetingText}>GOOD DAY,</Text>
-            <Text style={styles.studentName}>Xerted Joy Espanola</Text>
-            <View style={styles.tagBadge}>
-              <Text style={styles.tagText}>IT STUDENT</Text>
-            </View>
-          </View>
+    <ScrollView
+      contentContainerStyle={styles.page}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.hero}>
+        <View>
+          <Text style={styles.eyebrow}>CAMPUS LIFE, MADE SIMPLE</Text>
+          <Text style={styles.heading}>Hi, Maya 👋</Text>
+          <Text style={styles.subheading}>
+            Find something good to do today.
+          </Text>
         </View>
-
-        {/* Academic Performance Overview */}
-        <Text style={styles.sectionTitle}>Overview</Text>
-        <View style={styles.statsGrid}>
-          <View style={[styles.metricCard, styles.pendingCard]}>
-            <Text style={styles.metricNumber}>2.85</Text>
-            <Text style={styles.metricLabel}>GPA</Text>
-          </View>
-          <View style={[styles.metricCard, styles.completedCard]}>
-            <Text style={styles.metricNumber}>2</Text>
-            <Text style={styles.metricLabel}>Enrolled</Text>
-          </View>
-          <View style={[styles.metricCard, styles.completedCard]}>
-            <Text style={styles.metricNumber}>95%</Text>
-            <Text style={styles.metricLabel}>Attendance</Text>
-          </View>
+        <View style={styles.heroIcon}>
+          <Ionicons name="sparkles" size={26} color="#fff" />
         </View>
-
-        {/* Enrolled Courses */}
-        <Text style={styles.sectionTitle}>Enrolled Courses</Text>
-        
-        <TouchableOpacity 
-          style={styles.taskCard} 
-          onPress={() => router.push({ pathname: '/course/[id]', params: { id: 'CCE106' } })}
+      </View>
+      <Text style={styles.sectionTitle}>Your event snapshot</Text>
+      <View style={[styles.stats, width > 560 && styles.statsWide]}>
+        <StatCard
+          label="Total events"
+          value={`${events.length}`}
+          accent="#4F46E5"
+        />
+        <StatCard label="Joined events" value={`${joined}`} accent="#0F9D7A" />
+        <StatCard label="Coming up" value="4" accent="#E76F51" />
+      </View>
+      <View style={styles.explore}>
+        <View>
+          <Text style={styles.exploreTitle}>Ready to explore?</Text>
+          <Text style={styles.exploreText}>
+            New ideas, familiar faces, and a full campus calendar.
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => router.push("/(tabs)/events" as Href)}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
         >
-          <View style={styles.taskContent}>
-            <View style={styles.courseHeaderRow}>
-              <Text style={styles.greetingText}>CCE 106</Text>
-              <Text style={styles.statusText}>Active</Text>
-            </View>
-            <Text style={styles.taskTitle}>Mobile Application Development</Text>
-            <View style={styles.dateTag}>
-              <Text style={styles.dateText}>Tap to view course details</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.taskCard} 
-          onPress={() => router.push({ pathname: '/course/[id]', params: { id: 'IT17' } })}
-        >
-          <View style={styles.taskContent}>
-            <View style={styles.courseHeaderRow}>
-              <Text style={styles.greetingText}>IT 17</Text>
-              <Text style={styles.statusText}>Active</Text>
-            </View>
-            <Text style={styles.taskTitle}>Social and Professional Issues</Text>
-            <View style={styles.dateTag}>
-              <Text style={styles.dateText}>Tap to view course details</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+          <Text style={styles.buttonText}>Browse events</Text>
+          <Ionicons name="arrow-forward" size={17} color="#fff" />
+        </Pressable>
+      </View>
+      <Link href={"/events" as Href} style={styles.link}>
+        View all campus events →
+      </Link>
+    </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
+  page: {
+    padding: 20,
+    paddingBottom: 36,
   },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  heroCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#061322e6',
+  hero: {
+    backgroundColor: "#4F46E5",
+    padding: 22,
     borderRadius: 24,
-    padding: 18,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#334155',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
-  avatarWrapper: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 20,
-    backgroundColor: '#0a858b',
-  },
-  onlineBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#10B981',
-    borderWidth: 2,
-    borderColor: '#0d1017',
-  },
-  profileTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  greetingText: {
-    color: '#91b9c1',
+  eyebrow: {
+    color: "#DCD9FF",
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.5,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
-  studentName: {
-    color: '#c9def6',
-    fontSize: 18,
-    fontWeight: '800',
-    marginTop: 2,
+  heading: {
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: "800",
+    marginTop: 8,
   },
-  tagBadge: {
-    backgroundColor: '#80858a',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+  subheading: {
+    color: "#E9E8FF",
+    fontSize: 15,
     marginTop: 4,
   },
-  tagText: {
-    color: '#020204',
-    fontSize: 10,
-    fontWeight: '700',
+  heroIcon: {
+    backgroundColor: "#6D64ED",
+    borderRadius: 18,
+    padding: 12,
   },
   sectionTitle: {
-    color: '#525a62',
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 14,
-    letterSpacing: 0.5,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-    gap: 8,
-  },
-  metricCard: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  pendingCard: {
-    backgroundColor: '#1E1B4B',
-    borderColor: '#110e3a',
-  },
-  completedCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#85697f',
-  },
-  metricNumber: {
-    color: '#64a6e8',
+    color: "#14213D",
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: "800",
+    marginTop: 28,
+    marginBottom: 13,
   },
-  metricLabel: {
-    color: '#939495',
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 4,
+  stats: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
   },
-  taskCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1E293B',
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
+  statsWide: {
+    flexWrap: "nowrap",
   },
-  taskContent: {
-    flex: 1,
+  explore: {
+    backgroundColor: "#E8F5F1",
+    borderRadius: 22,
+    padding: 20,
+    marginTop: 28,
   },
-  courseHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  exploreTitle: {
+    color: "#14213D",
+    fontSize: 19,
+    fontWeight: "800",
   },
-  statusText: {
-    color: '#10B981',
-    fontSize: 11,
-    fontWeight: '700',
+  exploreText: {
+    color: "#526071",
+    lineHeight: 20,
+    marginTop: 5,
+    marginBottom: 16,
   },
-  taskTitle: {
-    color: '#b4bcc5',
-    fontSize: 15,
-    fontWeight: '700',
-    marginTop: 2,
+  button: {
+    backgroundColor: "#0F9D7A",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    gap: 8,
+    alignItems: "center",
   },
-  dateTag: {
-    marginTop: 4,
+  buttonPressed: {
+    opacity: 0.75,
   },
-  dateText: {
-    color: '#83aeea',
-    fontSize: 11,
-    fontWeight: '500',
+  buttonText: {
+    color: "#fff",
+    fontWeight: "800",
+  },
+  link: {
+    color: "#4F46E5",
+    fontWeight: "800",
+    marginTop: 22,
+    textAlign: "center",
   },
 });
-
