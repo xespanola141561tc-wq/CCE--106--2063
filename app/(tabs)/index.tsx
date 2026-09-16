@@ -1,228 +1,106 @@
-import { useRouter } from 'expo-router';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Link, useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { initialEvents } from '../../data/eventsData';
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
 
+  const cardWidth = width > 600 ? '48%' : '100%';
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Simple Top Welcome */}
-        <View style={styles.heroCard}>
-          <View style={styles.avatarWrapper}>
-            <View style={styles.avatar} />
-            <View style={styles.onlineBadge} />
-          </View>
-          <View style={styles.profileTextContainer}>
-            <Text style={styles.greetingText}>GOOD DAY,</Text>
-            <Text style={styles.studentName}>Xerted Joy Espanola</Text>
-            <View style={styles.tagBadge}>
-              <Text style={styles.tagText}>IT STUDENT</Text>
-            </View>
-          </View>
-        </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Welcome to EventMate!</Text>
+      <Text style={styles.subHeader}>Featured Dashboard Events</Text>
 
-        {/* Academic Performance Overview */}
-        <Text style={styles.sectionTitle}>Overview</Text>
-        <View style={styles.statsGrid}>
-          <View style={[styles.metricCard, styles.pendingCard]}>
-            <Text style={styles.metricNumber}>2.85</Text>
-            <Text style={styles.metricLabel}>GPA</Text>
-          </View>
-          <View style={[styles.metricCard, styles.completedCard]}>
-            <Text style={styles.metricNumber}>2</Text>
-            <Text style={styles.metricLabel}>Enrolled</Text>
-          </View>
-          <View style={[styles.metricCard, styles.completedCard]}>
-            <Text style={styles.metricNumber}>95%</Text>
-            <Text style={styles.metricLabel}>Attendance</Text>
-          </View>
-        </View>
+      <View style={styles.cardWrapper}>
+        {initialEvents.slice(0, 2).map((item) => (
+          <View key={item.id} style={[styles.card, { width: cardWidth }]}>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={styles.cardCategory}>{item.category} • {item.date}</Text>
+            <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
 
-        {/* Enrolled Courses */}
-        <Text style={styles.sectionTitle}>Enrolled Courses</Text>
-        
-        <TouchableOpacity 
-          style={styles.taskCard} 
-          onPress={() => router.push({ pathname: '/course/[id]', params: { id: 'CCE106' } })}
-        >
-          <View style={styles.taskContent}>
-            <View style={styles.courseHeaderRow}>
-              <Text style={styles.greetingText}>CCE 106</Text>
-              <Text style={styles.statusText}>Active</Text>
-            </View>
-            <Text style={styles.taskTitle}>Mobile Application Development</Text>
-            <View style={styles.dateTag}>
-              <Text style={styles.dateText}>Tap to view course details</Text>
-            </View>
+            <Pressable
+              style={styles.button}
+              onPress={() => router.push(`/events/${item.id}`)}
+            >
+              <Text style={styles.buttonText}>View Details</Text>
+            </Pressable>
           </View>
-        </TouchableOpacity>
+        ))}
+      </View>
 
-        <TouchableOpacity 
-          style={styles.taskCard} 
-          onPress={() => router.push({ pathname: '/course/[id]', params: { id: 'IT17' } })}
-        >
-          <View style={styles.taskContent}>
-            <View style={styles.courseHeaderRow}>
-              <Text style={styles.greetingText}>IT 17</Text>
-              <Text style={styles.statusText}>Active</Text>
-            </View>
-            <Text style={styles.taskTitle}>Social and Professional Issues</Text>
-            <View style={styles.dateTag}>
-              <Text style={styles.dateText}>Tap to view course details</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+      <View style={styles.linkContainer}>
+        <Link href="/(tabs)/events" style={styles.linkText}>
+          Browse All Events →
+        </Link>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  heroCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#061322e6',
-    borderRadius: 24,
-    padding: 18,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  avatarWrapper: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 20,
-    backgroundColor: '#0a858b',
-  },
-  onlineBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#10B981',
-    borderWidth: 2,
-    borderColor: '#0d1017',
-  },
-  profileTextContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  greetingText: {
-    color: '#91b9c1',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  studentName: {
-    color: '#c9def6',
-    fontSize: 18,
-    fontWeight: '800',
-    marginTop: 2,
-  },
-  tagBadge: {
-    backgroundColor: '#80858a',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginTop: 4,
-  },
-  tagText: {
-    color: '#020204',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  sectionTitle: {
-    color: '#525a62',
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 14,
-    letterSpacing: 0.5,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-    gap: 8,
-  },
-  metricCard: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  pendingCard: {
-    backgroundColor: '#1E1B4B',
-    borderColor: '#110e3a',
-  },
-  completedCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#85697f',
-  },
-  metricNumber: {
-    color: '#64a6e8',
-    fontSize: 20,
-    fontWeight: '900',
-  },
-  metricLabel: {
-    color: '#939495',
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  taskCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1E293B',
-    borderRadius: 18,
     padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
+    backgroundColor: '#F8F9FA',
+    flexGrow: 1,
   },
-  taskContent: {
-    flex: 1,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1C1C1E',
+    marginBottom: 4,
   },
-  courseHeaderRow: {
+  subHeader: {
+    fontSize: 16,
+    color: '#6C757D',
+    marginBottom: 16,
+  },
+  cardWrapper: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#212529',
+  },
+  cardCategory: {
+    fontSize: 12,
+    color: '#007AFF',
+    marginVertical: 4,
+  },
+  cardDesc: {
+    fontSize: 14,
+    color: '#495057',
+    marginBottom: 12,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    borderRadius: 6,
     alignItems: 'center',
   },
-  statusText: {
-    color: '#10B981',
-    fontSize: 11,
-    fontWeight: '700',
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
-  taskTitle: {
-    color: '#b4bcc5',
-    fontSize: 15,
-    fontWeight: '700',
-    marginTop: 2,
+  linkContainer: {
+    marginTop: 12,
+    alignItems: 'center',
   },
-  dateTag: {
-    marginTop: 4,
-  },
-  dateText: {
-    color: '#83aeea',
-    fontSize: 11,
-    fontWeight: '500',
+  linkText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
-

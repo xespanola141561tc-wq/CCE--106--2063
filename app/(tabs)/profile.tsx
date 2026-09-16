@@ -1,189 +1,99 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import { useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { EventItem, initialEvents } from '../../data/eventsData';
 
-export default function ProfileScreen() {
+export default function EventsScreen() {
+  const [search, setSearch] = useState('');
+
+  const filteredEvents = initialEvents.filter((e) =>
+    e.title.toLowerCase().includes(search.toLowerCase()) ||
+    e.category.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const renderItem = ({ item }: { item: EventItem }) => (
+    <View style={styles.card}>
+      <View style={styles.info}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.meta}>{item.category} | {item.date}</Text>
+      </View>
+
+      <Link href={`/events/${item.id}`} asChild>
+        <Pressable style={styles.linkBtn}>
+          <Text style={styles.linkBtnText}>Open</Text>
+        </Pressable>
+      </Link>
+    </View>
+  );
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      {/* Digital ID Hero Card */}
-      <View style={styles.heroCard}>
-        <View style={styles.avatarWrapper}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}></Text>
-          </View>
-          <View style={styles.onlineBadge} />
-        </View>
-        
-        <View style={styles.profileTextContainer}>
-          <View style={styles.cardHeaderRow}>
-            <Text style={styles.greetingText}>STUDENT DIGITAL ID</Text>
-            <View style={styles.activeBadge}>
-              <Text style={styles.activeText}>ENROLLED</Text>
-            </View>
-          </View>
-
-          <Text style={styles.studentName}>Xerted Joy Espanola</Text>
-          
-          <View style={styles.tagBadge}>
-            <Text style={styles.tagText}>ID: 141561</Text>
-          </View>
-          
-          <Text style={styles.studentEmail}>BS in Information Technology</Text>
-        </View>
-      </View>
-
-      {/* Account Details Section */}
-      <Text style={styles.sectionTitle}>Account & Contact Details</Text>
-
-      <View style={styles.glassForm}>
-        <Text style={styles.label}>Academic Status</Text>
-        <Text style={styles.value}>4th Syear 1st Semester</Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.label}>Institutional Email</Text>
-        <Text style={styles.value}>x.espanola.141561.tc@umindanao.edu.ph</Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.label}>Mobile Number</Text>
-        <Text style={styles.value}>+639309412120</Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.label}>Emergency Contact</Text>
-        <Text style={styles.value}>Mary Joy Tumales (Parent) · 09536682251</Text>
-      </View>
-    </ScrollView>
+    <View style={styles.container}>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Filter events by title or category..."
+        value={search}
+        onChangeText={setSearch}
+      />
+      <FlatList
+        data={filteredEvents}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.list}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#F8F9FA',
+    padding: 16,
   },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
+  searchBar: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CED4DA',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
   },
-  heroCard: {
+  list: {
+    paddingBottom: 16,
+  },
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#243654',
-    borderRadius: 24,
-    padding: 18,
-    marginBottom: 24,
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E9ECEF',
   },
-  avatarWrapper: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
-    backgroundColor: '#509198',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: '#a6b9c2',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  onlineBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#10B981',
-    borderWidth: 2,
-    borderColor: '#0d1421',
-  },
-  profileTextContainer: {
-    marginLeft: 16,
+  info: {
     flex: 1,
   },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  greetingText: {
-    color: '#7b86eb',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1.2,
-  },
-  activeBadge: {
-    backgroundColor: '#12634d',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#065F46',
-  },
-  activeText: {
-    color: '#34D399',
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  studentName: {
-    color: '#ddebf9',
+  title: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: 'bold',
+    color: '#212529',
+  },
+  meta: {
+    fontSize: 12,
+    color: '#6C757D',
     marginTop: 2,
   },
-  tagBadge: {
-    backgroundColor: '#312E81',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginTop: 4,
-    marginBottom: 4,
+  linkBtn: {
+    backgroundColor: '#E7F1FF',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
   },
-  tagText: {
-    color: '#A5B4FC',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  studentEmail: {
-    color: '#94A3B8',
-    fontSize: 12,
-  },
-  sectionTitle: {
-    color: '#a8afb6',
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 14,
-    letterSpacing: 0.5,
-  },
-  glassForm: {
-    backgroundColor: '#1E293B',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 28,
-    borderWidth: 1,
-    borderColor: '#020a14',
-  },
-  label: {
-    color: '#51a7b7',
-    fontSize: 11,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  value: {
-    color: '#f7fafd',
-    fontSize: 14,
+  linkBtnText: {
+    color: '#007AFF',
     fontWeight: '600',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#6489bc',
-    marginVertical: 12,
   },
 });
