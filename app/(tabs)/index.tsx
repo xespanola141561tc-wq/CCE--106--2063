@@ -59,6 +59,24 @@ export default function HomeScreen() {
           <Ionicons name="arrow-forward" size={17} color="#fff" />
         </Pressable>
       </View>
+      <View style={styles.attendanceCard}>
+        <View>
+          <Text style={styles.exploreTitle}>Lab 08: Attendance</Text>
+          <Text style={styles.exploreText}>
+            Mark your class as present or absent.
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => router.push("/lab08" as Href)}
+          style={({ pressed }) => [
+            styles.attendanceButton,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>Open attendance</Text>
+          <Ionicons name="clipboard-outline" size={17} color="#fff" />
+        </Pressable>
+      </View>
       <Link href={"/events" as Href} style={styles.link}>
         View all campus events →
       </Link>
@@ -121,6 +139,12 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 28,
   },
+  attendanceCard: {
+    backgroundColor: "#EEF0FF",
+    borderRadius: 22,
+    padding: 20,
+    marginTop: 16,
+  },
   exploreTitle: {
     color: "#14213D",
     fontSize: 19,
@@ -134,6 +158,16 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#0F9D7A",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    gap: 8,
+    alignItems: "center",
+  },
+  attendanceButton: {
+    backgroundColor: "#4F46E5",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
