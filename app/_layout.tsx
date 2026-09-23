@@ -1,29 +1,20 @@
-import { Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 
-export default function RootLayout() {
+SplashScreen.preventAutoHideAsync();
+
+export default function TabLayout() {
+  const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: '#1877F2' },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen 
-        name="course/[id]" 
-        options={{ 
-          title: 'Course Details',
-          headerBackTitle: 'Back',
-        }} 
-      />
-      <Stack.Screen 
-        name="student/[id]" 
-        options={{ 
-          title: 'Student ID Route',
-          headerBackTitle: 'Back',
-        }} 
-      />
-    </Stack>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </ThemeProvider>
   );
 }
