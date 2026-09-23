@@ -1,14 +1,21 @@
-import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { events } from '../../data/events';
+import { useAuth } from '../../context/AuthContext';
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { isRestoring, token } = useAuth();
 
   const event = events.find(item => item.id === id);
   const [isJoined, setIsJoined] = useState<boolean>(event?.joined || false);
+
+  if (isRestoring) {
+    return <View style={styles.errorContainer}><ActivityIndicator size="large" color="#4F46E5" /></View>;
+  }
+  if (!token) return <Redirect href={"/login" as Href} />;
 
   if (!event) {
     return (

@@ -1,175 +1,111 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { router, type Href } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useAuth } from "../../context/AuthContext";
+
+type ProfileRowProps = {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+};
+
+function ProfileRow({ icon, label, value }: ProfileRowProps) {
+  return (
+    <View style={styles.profileRow}>
+      <Ionicons name={icon} size={19} color="#35688B" />
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowValue}>{value}</Text>
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
-  const [name, setName] = useState("Maya Chen");
-  const [email, setEmail] = useState("maya.chen@campus.edu");
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
-  const [saved, setSaved] = useState(false);
-  const save = () => {
-    const next = {
-      name: name.trim() ? undefined : "Full name is required.",
-      email: /^\S+@\S+\.\S+$/.test(email)
-        ? undefined
-        : "Enter a valid email address.",
-    };
-    setErrors(next);
-    setSaved(!next.name && !next.email);
-  };
+  const { signOut } = useAuth();
+
+  async function handleLogout() {
+    await signOut();
+    router.replace("/login" as Href);
+  }
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.page}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.profile}>
-        <Image
-          source={require("../../assets/images/icon.png")}
-          style={styles.avatar}
-        />
-        <View>
-          <Text style={styles.name}>{name || "Your name"}</Text>
-          <Text style={styles.email}>{email || "Add your email"}</Text>
+    <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
+      <Text style={styles.course}>CCE 106 · STUDENT SERVICES</Text>
+      <Text style={styles.heading}>Student Portal</Text>
+      <Text style={styles.subtitle}>Your account and academic profile</Text>
+
+      <View style={styles.card}>
+        <View style={styles.identityRow}>
+          <View style={styles.avatar}>
+            <Ionicons name="person" size={33} color="#FFFFFF" />
+          </View>
+          <View style={styles.identityText}>
+            <Text style={styles.name}>Demo Student</Text>
+            <Text style={styles.role}>STUDENT</Text>
+            <Text style={styles.email}>student@cce106.demo</Text>
+          </View>
         </View>
+
+        <View style={styles.sessionBanner}>
+          <Ionicons name="shield-checkmark" size={17} color="#159261" />
+          <Text style={styles.sessionText}>Demo protected session active · Student</Text>
+        </View>
+
+        <Text style={styles.sectionLabel}>ACADEMIC PROFILE</Text>
+        <View style={styles.divider} />
+        <ProfileRow icon="phone-portrait-outline" label="Student ID" value="CCE-106-001" />
+        <View style={styles.divider} />
+        <ProfileRow icon="school-outline" label="Program" value="Information\nTechnology" />
+        <View style={styles.divider} />
+        <ProfileRow icon="layers-outline" label="Year level" value="3rd Year" />
+
+        <Pressable onPress={() => router.push("/grades" as Href)} style={({ pressed }) => [styles.gradesButton, pressed && styles.pressed]}>
+          <Ionicons name="document-text-outline" size={20} color="#315E7D" />
+          <Text style={styles.gradesText}>View grades</Text>
+          <Ionicons name="chevron-forward" size={21} color="#6E808A" />
+        </Pressable>
+
+        <Pressable onPress={handleLogout} style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}>
+          <Ionicons name="log-out-outline" size={20} color="#315E7D" />
+          <Text style={styles.logoutText}>Log out</Text>
+        </Pressable>
       </View>
-      <Text style={styles.label}>FULL NAME</Text>
-      <TextInput
-        value={name}
-        onChangeText={(value) => {
-          setName(value);
-          setSaved(false);
-        }}
-        placeholder="Your full name"
-        style={[styles.input, errors.name && styles.invalid]}
-        autoCapitalize="words"
-      />
-      {errors.name && <Text style={styles.error}>{errors.name}</Text>}
-      <Text style={styles.label}>EMAIL ADDRESS</Text>
-      <TextInput
-        value={email}
-        onChangeText={(value) => {
-          setEmail(value);
-          setSaved(false);
-        }}
-        placeholder="name@example.com"
-        style={[styles.input, errors.email && styles.invalid]}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      {errors.email && <Text style={styles.error}>{errors.email}</Text>}
-      <Pressable
-        onPress={save}
-        style={({ pressed }) => [styles.save, pressed && styles.savePressed]}
-      >
-        <Text style={styles.saveText}>Save profile</Text>
-        <Ionicons name="checkmark" size={19} color="#fff" />
-      </Pressable>
-      {saved && (
-        <View style={styles.success}>
-          <Ionicons name="checkmark-circle" size={20} color="#0F9D7A" />
-          <Text style={styles.successText}>Profile saved successfully.</Text>
-        </View>
-      )}
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
-  page: {
-    padding: 20,
-    paddingBottom: 36,
-  },
-  profile: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 26,
-    shadowColor: "#172B4D",
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  avatar: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: "#E8E5FF",
-  },
-  name: {
-    color: "#14213D",
-    fontSize: 19,
-    fontWeight: "800",
-  },
-  email: {
-    color: "#667085",
-    marginTop: 3,
-  },
-  label: {
-    color: "#526071",
-    fontSize: 12,
-    letterSpacing: 0.8,
-    fontWeight: "800",
-    marginBottom: 8,
-    marginTop: 16,
-  },
-  input: {
-    backgroundColor: "#fff",
+  page: { backgroundColor: "#F5FAFB", flexGrow: 1, padding: 22, paddingBottom: 32, paddingTop: 28 },
+  course: { color: "#438E96", fontSize: 10, fontWeight: "900", letterSpacing: 1.35 },
+  heading: { color: "#14213D", fontSize: 28, fontWeight: "900", marginTop: 8 },
+  subtitle: { color: "#75828A", fontSize: 14, marginTop: 6, marginBottom: 24 },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D9E5E8",
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#DCE2EC",
-    borderRadius: 12,
-    padding: 14,
-    color: "#14213D",
-    fontSize: 16,
+    elevation: 4,
+    padding: 21,
+    shadowColor: "#163B4B",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
-  invalid: {
-    borderColor: "#D14343",
-  },
-  error: {
-    color: "#D14343",
-    marginTop: 6,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  save: {
-    backgroundColor: "#4F46E5",
-    borderRadius: 13,
-    padding: 15,
-    marginTop: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 7,
-  },
-  savePressed: {
-    opacity: 0.72,
-  },
-  saveText: {
-    color: "#fff",
-    fontWeight: "800",
-    fontSize: 16,
-  },
-  success: {
-    marginTop: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 13,
-    borderRadius: 12,
-    backgroundColor: "#E8F5F1",
-  },
-  successText: {
-    color: "#08785B",
-    fontWeight: "700",
-  },
+  identityRow: { alignItems: "center", flexDirection: "row", gap: 14 },
+  avatar: { alignItems: "center", backgroundColor: "#145490", borderRadius: 17, height: 55, justifyContent: "center", width: 55 },
+  identityText: { flex: 1 },
+  name: { color: "#14213D", fontSize: 19, fontWeight: "900" },
+  role: { color: "#159261", fontSize: 10, fontWeight: "900", marginTop: 4 },
+  email: { color: "#75828A", fontSize: 12, marginTop: 5 },
+  sessionBanner: { alignItems: "center", backgroundColor: "#E3F8EC", borderRadius: 8, flexDirection: "row", gap: 8, marginTop: 19, paddingHorizontal: 12, paddingVertical: 10 },
+  sessionText: { color: "#14845A", flex: 1, fontSize: 11, fontWeight: "800" },
+  sectionLabel: { color: "#60717A", fontSize: 10, fontWeight: "900", letterSpacing: 1.15, marginTop: 27, marginBottom: 9 },
+  divider: { backgroundColor: "#E5ECEE", height: 1 },
+  profileRow: { alignItems: "center", flexDirection: "row", gap: 11, minHeight: 54 },
+  rowLabel: { color: "#7A878E", flex: 1, fontSize: 13 },
+  rowValue: { color: "#1D2A35", fontSize: 13, fontWeight: "800", textAlign: "right" },
+  gradesButton: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#DDE7E9", borderRadius: 13, borderWidth: 1, flexDirection: "row", gap: 11, marginTop: 24, paddingHorizontal: 14, paddingVertical: 14 },
+  gradesText: { color: "#14213D", flex: 1, fontSize: 14, fontWeight: "800" },
+  logoutButton: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#E1E9EB", borderRadius: 13, borderWidth: 1, flexDirection: "row", gap: 10, justifyContent: "center", marginTop: 21, paddingVertical: 14 },
+  logoutText: { color: "#14213D", fontSize: 14, fontWeight: "800" },
+  pressed: { opacity: 0.7 },
 });
